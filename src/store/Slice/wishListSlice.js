@@ -1,3 +1,5 @@
+import { produce } from "immer";
+
 /* Action Types */
 const ADD_TO_WISH_LIST = "ADD_TO_WISH_LIST";
 const REMOVE_FROM_WISH_LIST = "REMOVE_FROM_WISH_LIST";
@@ -40,25 +42,31 @@ const saveWishListToLocalStorage = (state) => {
     }
 };
 
-/* Reducer */
-export const wishListReducer = (state = loadWishListFromLocalStorage(), action) => {
-    let updatedState;
-    switch (action.type) {
-        case ADD_TO_WISH_LIST:
-            // Check if the item already exists in the wishlist
-            if (state.some((item) => item.id === action.payload.id)) {
-                return state; // Return the state as is if the item already exists
-            }
-            updatedState = [...state, action.payload]; // Add the new item otherwise
-            saveWishListToLocalStorage(updatedState); // Save updated wishlist to localStorage
-            return updatedState;
+// Reducer
+export const wishListReducer = (originalState = loadWishListFromLocalStorage(), action) => {
+    return produce(originalState, (state) => {
+        const existingIndex = state.findIndex((item) => item.id === action?.payload?.id);
 
-        case REMOVE_FROM_WISH_LIST:
-            updatedState = state.filter((item) => item.id !== action.payload.id); // Remove item from wishlist
-            saveWishListToLocalStorage(updatedState); // Save updated wishlist to localStorage
-            return updatedState;
+        switch (action.type) {
+            case ADD_TO_WISH_LIST:
+                if (existingIndex === -1) {
+                    // Only add item if it doesn't exist in the wishlist
+                    state.push(action.payload);
+                }
+                break;
 
-        default:
-            return state;
-    }
+            case REMOVE_FROM_WISH_LIST:
+                if (existingIndex !== -1) {
+                    // Only remove item if it exists in the wishlist
+                    state.splice(existingIndex, 1);
+                }
+                break;
+
+            default:
+                return state;
+        }
+
+        // Save the updated wishlist to localStorage
+        saveWishListToLocalStorage(state);
+    });
 };

@@ -44,6 +44,14 @@ export default function CartItem({
         >
           +
         </button>
+        <button
+          className="ms-3 px-5 py-2 bg-slate-300"
+          onClick={() => {
+            dispatch(removeCart({ id }));
+          }}
+        >
+          Remove
+        </button>
       </div>
       <div className="item-total">${(quantity * price).toFixed(2)}</div>
     </div>

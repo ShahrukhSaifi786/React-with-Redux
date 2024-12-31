@@ -17,6 +17,7 @@ export default function Cart() {
           <div className="cart-item">Item</div>
           <div className="item-price">Price</div>
           <div className="quantity">Quantity</div>
+          {/* <div className="quantity">Remove</div> */}
           <div className="total">Total</div>
         </div>
         {cartItems.map(({ id, title, rating, price, imageUrl, quantity }) => (
