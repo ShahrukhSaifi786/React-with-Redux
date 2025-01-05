@@ -1,10 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import CartIcon from "../assets/cart-icon.svg";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { MdFavoriteBorder } from "react-icons/md";
+import axios from "axios";
+import {
+  fetchAllProduct,
+  isError,
+  isLoading,
+} from "../store/Slice/productSlice";
 
 export default function Header() {
+  const dispatch = useDispatch();
+  const fetchedData = async () => {
+    try {
+      const res = await axios.get("https://fakestoreapi.com/products");
+      dispatch(isLoading(true));
+      dispatch(fetchAllProduct(res.data));
+    } catch (error) {
+      dispatch(isError("Something went wrong"));
+    }
+  };
+  useEffect(() => {
+    fetchedData();
+  }, []);
   const storeState = useSelector((state) => state);
   const { cartItem, wishList } = storeState;
   return (

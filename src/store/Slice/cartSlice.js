@@ -4,71 +4,64 @@ import { createSlice } from "@reduxjs/toolkit";
 const loadCartFromLocalStorage = () => {
     try {
         const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-            return JSON.parse(savedCart); // Parse the saved cart from localStorage
-        }
-        return []; // If no cart is in localStorage, return an empty array
+        return savedCart ? JSON.parse(savedCart) : [];
     } catch (error) {
         console.error("Error loading cart from localStorage:", error);
         return [];
     }
 }
 
-// Helper function to save the state to localStorage
 const saveCartToLocalStorage = (state) => {
     try {
-        localStorage.setItem('cart', JSON.stringify(state)); // Save the state as a JSON string
+        localStorage.setItem('cart', JSON.stringify(state));
     } catch (error) {
         console.error("Error saving cart to localStorage:", error);
     }
 }
-
 const existingItemIndex = (state, action) => state.findIndex((item) => item.id === action.payload?.id);
-
-const slice = createSlice({
+const cartSlice = createSlice({
     name: 'cartItem',
-    initialState: [],
+    initialState: /* loadCartFromLocalStorage() */ [],
     reducers: {
         addCart(state, action) {
             const existingIndex = existingItemIndex(state, action);
-
             if (existingIndex !== -1) {
-                // If item exists, increment its quantity
                 state[existingIndex].quantity += 1;
             } else {
-                // If item doesn't exist, add it with quantity 1
                 state.push({ ...action.payload, quantity: 1 });
             }
+            saveCartToLocalStorage(state);
         },
         removeCart(state, action) {
             const existingIndex = existingItemIndex(state, action);
             if (existingIndex !== -1) {
-                state.splice(existingIndex, 1); // Remove the item if it exists
+                state.splice(existingIndex, 1);
             }
+            saveCartToLocalStorage(state);
         },
         increaseQuantity(state, action) {
             const existingIndex = existingItemIndex(state, action);
             if (existingIndex !== -1) {
-                state[existingIndex].quantity += 1; // Increase quantity
+                state[existingIndex].quantity += 1;
             }
+            saveCartToLocalStorage(state);
         },
         decreaseQuantity(state, action) {
             const existingIndex = existingItemIndex(state, action);
             if (existingIndex !== -1) {
                 const item = state[existingIndex];
-                item.quantity -= 1; // Decrease quantity
-
-                // Remove the item from cart if quantity becomes 0 or less
+                item.quantity -= 1;
                 if (item.quantity <= 0) {
                     state.splice(existingIndex, 1);
                 }
+                saveCartToLocalStorage(state);
             }
         },
     }
 });
 
-export const { addCart, removeCart, increaseQuantity, decreaseQuantity } = slice.actions;
-export default slice.reducer;
+export const { addCart, removeCart, increaseQuantity, decreaseQuantity } = cartSlice.actions;
+export default cartSlice.reducer;
 
 
 
@@ -108,7 +101,7 @@ export const decreaseQuantity = (id) => {
 }
  */
 
-// Cart Reducer with produce method 
+// Cart Reducer with produce method
 
 /* export const cartReducer = (originalState = loadCartFromLocalStorage(), action) => {
     return produce(originalState, (state) => {
@@ -140,7 +133,7 @@ export const decreaseQuantity = (id) => {
                 if (itemExists) {
                     state[existingIndex].quantity -= 1;
                     if (state[existingIndex].quantity <= 0) {
-                        state.splice(existingIndex, 1); 
+                        state.splice(existingIndex, 1);
                     }
                 }
                 break;
